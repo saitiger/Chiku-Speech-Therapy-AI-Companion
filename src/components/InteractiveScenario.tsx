@@ -7,9 +7,12 @@ import { ArrowRight, MessageSquare, Mic, MicOff } from 'lucide-react';
 import { toast } from 'sonner';
 import CharacterBubble from '@/components/CharacterBubble';
 import { convertSpeechToText } from '@/services/api';
+import CafeEnvironment from '@/components/CafeEnvironment';
+
 interface InteractiveScenarioProps {
   scenarioContent: DifficultyLevelContent;
 }
+
 const InteractiveScenario: React.FC<InteractiveScenarioProps> = ({
   scenarioContent
 }) => {
@@ -42,11 +45,22 @@ const InteractiveScenario: React.FC<InteractiveScenarioProps> = ({
     setCompleted(false);
     setCustomResponse("");
   }, [scenarioContent, setCurrentStep]);
+  
   if (!scenarioContent || !currentExchange) {
     return <div className="w-full p-8 text-center">
         <p className="text-speech-dark">This scenario is currently being prepared. Please try another activity!</p>
       </div>;
   }
+  
+  // Determine environment type based on current step
+  const getEnvironmentType = () => {
+    // Simple mapping based on the current step in a 3-step scenario
+    if (currentStep === 1) return 'order';
+    if (currentStep === 2) return 'whippedCream';
+    if (currentStep === 3) return 'wrongDrink';
+    return 'general';
+  };
+
   const handleSelectResponse = (response: ResponseOption) => {
     setSelectedResponse(response);
     setShowFeedback(true);
@@ -191,6 +205,7 @@ const InteractiveScenario: React.FC<InteractiveScenarioProps> = ({
         return "bg-gray-500";
     }
   };
+  
   return <div className="w-full">
       {/* Scene description */}
       <Card className="mb-6 bg-speech-light/50">
@@ -205,14 +220,13 @@ const InteractiveScenario: React.FC<InteractiveScenarioProps> = ({
       }} message={currentExchange.text || "What would you say in this situation?"} />
       </div>
       
-      {/* Visual support if available */}
+      {/* Visual support with CafeEnvironment component */}
       {currentExchange.visualSupport && <div className="mb-6 flex justify-center">
           <div className="bg-white p-2 rounded-lg shadow-md max-w-md">
-            <img src="/story-image.png" // Placeholder for actual visual support
-        alt="Visual support" className="w-full rounded" />
-            <p className="text-xs text-center mt-1 text-speech-dark/70">
-              {currentExchange.visualSupport}
-            </p>
+            <CafeEnvironment 
+              type={getEnvironmentType()}
+              description={currentExchange.visualSupport}
+            />
           </div>
         </div>}
       
@@ -274,4 +288,5 @@ const InteractiveScenario: React.FC<InteractiveScenarioProps> = ({
         </div>}
     </div>;
 };
+
 export default InteractiveScenario;
