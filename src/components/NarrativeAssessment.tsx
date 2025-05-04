@@ -2,11 +2,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Button } from "@/components/ui/button";
-import { Mic, Square, Play } from 'lucide-react';
+import { Mic, Square, Play, ArrowRight } from 'lucide-react';
 import { useScenario } from '@/context/ScenarioContext';
-import { convertSpeechToText } from '@/services/api';
+import { convertSpeechToText, generateClaudeFeedback } from '@/services/api';
 import { toast } from "sonner";
-import { supabase } from '@/integrations/supabase/client';
 
 const AntarcticBackdrop = styled.div`
   width: 100%;
@@ -30,7 +29,7 @@ const PenguinContainer = styled.div`
   }
 `;
 
-const TextBubble = styled.div`
+const TextBubble = styled.div<{ isResponse?: boolean }>`
   position: absolute;
   top: 60px;
   left: 55vw;
@@ -45,13 +44,47 @@ const TextBubble = styled.div`
   min-width: 320px;
   max-width: 450px;
   z-index: 2;
+  ${props => props.isResponse && `
+    background: #e3f2fd;
+    border-color: #2196f3;
+  `}
 `;
 
+const StepIndicator = styled.div`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  color: #333;
+  z-index: 3;
+`;
+
+// Step dialogue prompts
+const stepDialogues = [
+  "Hi there! Tell me about a birthday party you remember?",
+  "That sounds fun! What was your favorite part of the birthday party?",
+  "If you could plan your next birthday party, what would you want to do?"
+];
+
 const NarrativeAssessment: React.FC = () => {
-  const { setUserResponse, setIsLoading } = useScenario();
+  const { 
+    setUserResponse, 
+    userResponse,
+    setIsLoading, 
+    setFeedback,
+    stepFeedback, 
+    setStepFeedback,
+    currentStep,
+    totalSteps,
+    advanceToNextStep
+  } = useScenario();
+  
   const [showPenguin, setShowPenguin] = useState(false);
   const [showBubble, setShowBubble] = useState(false);
-  const [childName, setChildName] = useState('Radhika');
+  const [childName, setChildName] = useState('Friend');
   const [isRecording, setIsRecording] = useState(false);
   const [recordedAudio, setRecordedAudio] = useState<string | null>(null);
   const [transcriptionInProgress, setTranscriptionInProgress] = useState(false);
@@ -95,13 +128,17 @@ const NarrativeAssessment: React.FC = () => {
           if (transcribedText) {
             setUserResponse(transcribedText);
             toast.success("Audio successfully transcribed!");
+            
+            // Now process the transcribed text with Claude
+            processWithClaude(transcribedText);
           } else {
             toast.error("Could not transcribe audio. Please try again.");
+            setIsLoading(false);
+            setTranscriptionInProgress(false);
           }
         } catch (error) {
           console.error("Error processing audio:", error);
           toast.error("Error processing audio. Please try again.");
-        } finally {
           setIsLoading(false);
           setTranscriptionInProgress(false);
         }
@@ -113,6 +150,35 @@ const NarrativeAssessment: React.FC = () => {
     } catch (error) {
       console.error("Error starting recording:", error);
       toast.error("Could not access microphone. Please check permissions.");
+    }
+  };
+
+  // Process transcribed text with Claude
+  const processWithClaude = async (transcribedText: string) => {
+    try {
+      const scenarioContext = `Penguin Narrative Assessment, Step ${currentStep} of ${totalSteps}: "${stepDialogues[currentStep-1]}"`;
+      
+      // Get feedback from Claude through the API
+      const claudeFeedback = await generateClaudeFeedback(
+        transcribedText, 
+        scenarioContext,
+        currentStep,
+        totalSteps
+      );
+      
+      if (currentStep === totalSteps) {
+        // Final step - store complete evaluation
+        setFeedback(claudeFeedback);
+      } else {
+        // Intermediate step - store step feedback
+        setStepFeedback(claudeFeedback);
+      }
+    } catch (error) {
+      console.error("Error processing with Claude:", error);
+      toast.error("Error getting feedback. Using simulated feedback instead.");
+    } finally {
+      setIsLoading(false);
+      setTranscriptionInProgress(false);
     }
   };
 
@@ -138,9 +204,21 @@ const NarrativeAssessment: React.FC = () => {
     }
   };
 
+  // Handle continuing to the next step
+  const handleNextStep = () => {
+    advanceToNextStep();
+    setRecordedAudio(null);
+    setShowBubble(false);
+    setTimeout(() => setShowBubble(true), 500);
+  };
+
   return (
     <div className="relative w-full h-screen overflow-hidden bg-blue-50">
       <AntarcticBackdrop />
+      
+      <StepIndicator>
+        Step {currentStep} of {totalSteps}
+      </StepIndicator>
       
       {showPenguin && (
         <PenguinContainer>
@@ -152,8 +230,24 @@ const NarrativeAssessment: React.FC = () => {
       
       {showBubble && (
         <TextBubble>
-          Hi, {childName} — Tell me about a birthday party you remember?
+          Hi, {childName} — {stepDialogues[currentStep - 1]}
         </TextBubble>
+      )}
+      
+      {userResponse && stepFeedback && (
+        <div className="absolute top-36 right-10 w-80 bg-white p-4 rounded-lg shadow-lg z-10">
+          <h3 className="font-bold text-gray-800 mb-2">Feedback:</h3>
+          <p className="text-gray-700 mb-3">{stepFeedback.feedback}</p>
+          <p className="text-green-600 italic">{stepFeedback.encouragement}</p>
+          <p className="text-blue-600 mt-2 font-medium">{stepFeedback.nextStepTip}</p>
+          
+          <Button 
+            onClick={handleNextStep} 
+            className="mt-4 w-full flex items-center justify-center gap-2 bg-speech-purple"
+          >
+            Continue <ArrowRight size={16} />
+          </Button>
+        </div>
       )}
 
       <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
@@ -196,6 +290,13 @@ const NarrativeAssessment: React.FC = () => {
            transcriptionInProgress ? "Processing..." :
            "Press to start recording"}
         </p>
+        
+        {userResponse && (
+          <div className="mt-6 p-4 bg-white rounded-lg shadow-md max-w-lg">
+            <h3 className="text-gray-700 font-medium mb-2">Your response:</h3>
+            <p className="text-gray-600">"{userResponse}"</p>
+          </div>
+        )}
       </div>
 
       <style>{`

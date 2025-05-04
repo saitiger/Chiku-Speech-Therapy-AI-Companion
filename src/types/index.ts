@@ -102,6 +102,8 @@ export interface ScenarioContextValue {
   setUserResponse: (response: string) => void;
   feedback: FeedbackResponse | null;
   setFeedback: (feedback: FeedbackResponse | null) => void;
+  stepFeedback: any | null; // For intermediate step feedback
+  setStepFeedback: (feedback: any | null) => void;
   isListening: boolean;
   setIsListening: (isListening: boolean) => void;
   isLoading: boolean;
@@ -112,6 +114,9 @@ export interface ScenarioContextValue {
   setSelectedDifficulty: (difficulty: DifficultyLevel) => void;
   currentStep: number;
   setCurrentStep: (step: number) => void;
+  totalSteps: number;
+  setTotalSteps: (steps: number) => void;
+  advanceToNextStep: () => void;
   progressData: ProgressData;
   updateProgress: (scenarioId: string, metrics: Partial<ScenarioMetrics>) => void;
 }

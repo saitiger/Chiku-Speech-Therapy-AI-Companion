@@ -10,6 +10,8 @@ const CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
 interface EvaluationRequest {
   childResponse: string;
   scenarioContext: string;
+  currentStep?: number;
+  totalSteps?: number;
 }
 
 interface ApiError {
@@ -47,7 +49,7 @@ serve(async (req) => {
 
     // Parse request body
     const requestData = await req.json();
-    const { childResponse, scenarioContext } = requestData as EvaluationRequest;
+    const { childResponse, scenarioContext, currentStep = 1, totalSteps = 3 } = requestData as EvaluationRequest;
     
     if (!childResponse || !scenarioContext) {
       return new Response(
@@ -60,8 +62,10 @@ serve(async (req) => {
     }
 
     console.log("Received request to evaluate response:", childResponse.substring(0, 50) + "...");
+    console.log("Current step:", currentStep, "of", totalSteps);
     
-    // Create system prompt for Claude
+    // Load demo scenario prompt from assets
+    // We'll use the System Instructions from demo-scenario.md
     const systemPrompt = `You are a licensed speech-language pathologist and child psychologist evaluating a child's speech therapy interaction. The child is between 6–10 years old and responded during a guided exercise in a speech therapy app. Use the following hybrid rubric to score and provide feedback.
 
 ### Evaluation Rubric (Rate each from 0–5):
@@ -78,6 +82,12 @@ serve(async (req) => {
 7. Cooperation/Social Cues: Turn-taking, politeness, and following directions.
 8. Self-Control/Emotion Expression: Calmness, emotional regulation, appropriate tone.
 
+${currentStep === totalSteps ? `
+This is the final step of the scenario. Include a complete evaluation summary with scores for each category.
+` : `
+This is step ${currentStep} of ${totalSteps} in the scenario. Provide brief feedback appropriate for this step.
+`}
+
 Use a warm and supportive tone appropriate for children and therapists reviewing progress.`;
 
     // Create user prompt with child's response and scenario context
@@ -88,6 +98,7 @@ ${childResponse}
 ### Scenario Context:
 ${scenarioContext}
 
+${currentStep === totalSteps ? `
 Please evaluate this response according to the rubric and return a JSON object with:
 - Score for each of the 8 categories (0 to 5)
 - A brief, friendly feedback comment for each category
@@ -116,6 +127,15 @@ Format example (please include all these fields):
   "cooperationFeedback": "You were polite and followed directions well.",
   "selfControlFeedback": "You expressed your thoughts calmly and clearly."
 }
+` : `
+Please provide brief feedback on this response and suggest what to focus on for the next step.
+Return JSON in this format:
+{
+  "feedback": "Great job! I like how you...",
+  "encouragement": "You're doing wonderfully!",
+  "nextStepTip": "For the next part, try to focus on..."
+}
+`}
 
 Important: Return ONLY the JSON object, nothing else, so it can be parsed directly.`;
 
@@ -153,7 +173,7 @@ Important: Return ONLY the JSON object, nothing else, so it can be parsed direct
     // Parse the JSON from Claude's response
     try {
       const feedbackData = JSON.parse(responseContent);
-      console.log("Parsed feedback data successfully");
+      console.log("Parsed feedback data successfully:", feedbackData);
       
       return new Response(JSON.stringify(feedbackData), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

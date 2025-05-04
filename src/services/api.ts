@@ -1,3 +1,4 @@
+
 import { FeedbackResponse } from '@/types';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,14 +49,20 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
 // Evaluate response using Claude API via Supabase Edge Function
 export const evaluateResponse = async (
   childResponse: string,
-  scenarioContext: string
-): Promise<FeedbackResponse> => {
+  scenarioContext: string,
+  currentStep: number = 1,
+  totalSteps: number = 3
+): Promise<FeedbackResponse | any> => {
   try {
+    console.log(`Evaluating step ${currentStep} of ${totalSteps}`);
+    
     // Call the Supabase Edge Function that handles Claude API with expanded rubric
     const { data, error } = await supabase.functions.invoke('claude-evaluation', {
       body: {
         childResponse,
-        scenarioContext
+        scenarioContext,
+        currentStep,
+        totalSteps
       }
     });
 
@@ -63,25 +70,36 @@ export const evaluateResponse = async (
       console.error('Supabase Edge Function error:', error);
       toast.error('Unable to connect to Claude. Using simulated feedback instead.');
       // Fall back to simulation if Edge Function fails
-      return simulateFeedback(childResponse, scenarioContext);
+      return simulateFeedback(childResponse, scenarioContext, currentStep, totalSteps);
     }
 
-    return data as FeedbackResponse;
+    return data;
   } catch (supabaseError) {
     console.error('Error calling Supabase Edge Function:', supabaseError);
     toast.error('Unable to connect to Claude. Using simulated feedback instead.');
     // Fall back to simulation if there's an error
-    return simulateFeedback(childResponse, scenarioContext);
+    return simulateFeedback(childResponse, scenarioContext, currentStep, totalSteps);
   }
 };
 
 // Separate function for simulated feedback
 const simulateFeedback = async (
   childResponse: string, 
-  scenarioContext: string
-): Promise<FeedbackResponse> => {
+  scenarioContext: string,
+  currentStep: number = 1,
+  totalSteps: number = 3
+): Promise<FeedbackResponse | any> => {
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 1500));
+  
+  // If this is not the final step, return intermediate feedback
+  if (currentStep < totalSteps) {
+    return {
+      feedback: "Great job! You explained yourself clearly.",
+      encouragement: "You're doing wonderfully with this exercise!",
+      nextStepTip: "For the next part, try to use descriptive words when you explain."
+    };
+  }
   
   // This is a simulation - in a real app, this would be a call to Claude API
   // Generate simulated feedback based on response length and content
@@ -169,7 +187,9 @@ const simulateFeedback = async (
 // Export the main function that will try to use Claude or fall back to simulation
 export const generateClaudeFeedback = async (
   childResponse: string,
-  scenarioContext: string
-): Promise<FeedbackResponse> => {
-  return evaluateResponse(childResponse, scenarioContext);
+  scenarioContext: string,
+  currentStep: number = 1,
+  totalSteps: number = 3
+): Promise<FeedbackResponse | any> => {
+  return evaluateResponse(childResponse, scenarioContext, currentStep, totalSteps);
 };

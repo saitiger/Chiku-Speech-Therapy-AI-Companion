@@ -20,10 +20,12 @@ export const ScenarioProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [activeScenario, setActiveScenario] = useState<ScenarioDetails | null>(null);
   const [userResponse, setUserResponse] = useState<string>('');
   const [feedback, setFeedback] = useState<FeedbackResponse | null>(null);
+  const [stepFeedback, setStepFeedback] = useState<any | null>(null);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>('beginner');
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [totalSteps, setTotalSteps] = useState<number>(3);
   const [progressData, setProgressData] = useState<ProgressData>(() => {
     // Load progress from localStorage if available
     const savedProgress = localStorage.getItem('speechTherapyProgress');
@@ -39,7 +41,17 @@ export const ScenarioProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const resetScenario = () => {
     setUserResponse('');
     setFeedback(null);
+    setStepFeedback(null);
     setCurrentStep(1);
+  };
+
+  // Advance to the next step in multi-step scenario
+  const advanceToNextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(prev => prev + 1);
+      setUserResponse('');
+      setStepFeedback(null);
+    }
   };
 
   // Update progress data for a scenario
@@ -109,6 +121,8 @@ export const ScenarioProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setUserResponse,
         feedback,
         setFeedback,
+        stepFeedback,
+        setStepFeedback,
         isListening,
         setIsListening,
         isLoading,
@@ -119,6 +133,9 @@ export const ScenarioProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setSelectedDifficulty,
         currentStep,
         setCurrentStep,
+        totalSteps,
+        setTotalSteps,
+        advanceToNextStep,
         progressData,
         updateProgress
       }}
