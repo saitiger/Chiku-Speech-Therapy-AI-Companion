@@ -15,7 +15,7 @@ const games = [
     id: 'narrative-assessment',
     title: 'Penguin Story Time',
     description: 'Help the penguin by telling a story about a birthday party!',
-    imagePath: '/penguin-game.png', // Updated image path
+    imagePath: '/assests/mini-game-assets/frontend/src/penguin.png', // Updated path to penguin image
     path: '/narrative-assessment',
     backgroundColor: 'bg-gradient-to-br from-blue-100 to-blue-50'
   }
@@ -48,6 +48,9 @@ const HomePage: React.FC = () => {
       navigate('/scenario');
     }
   };
+  
+  // Get the user's name or use a default
+  const userName = progressData?.settings?.userName || 'Friend';
   
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-speech-light">
@@ -83,7 +86,7 @@ const HomePage: React.FC = () => {
           
           {/* Welcome message */}
           <div className="bg-gradient-to-r from-speech-purple to-speech-blue rounded-xl p-6 mb-8 text-white shadow-md">
-            <h2 className="text-xl font-bold mb-2">Welcome back, {progressData.settings.userName || 'Friend'}!</h2>
+            <h2 className="text-xl font-bold mb-2">Welcome back, {userName}!</h2>
             <p>Continue practicing your speech skills with fun activities and games.</p>
           </div>
           

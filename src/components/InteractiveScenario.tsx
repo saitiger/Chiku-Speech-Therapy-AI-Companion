@@ -41,12 +41,6 @@ const InteractiveScenario: React.FC<InteractiveScenarioProps> = ({ scenarioConte
     setShowFeedback(true);
   };
   
-  // Update the incrementStep function to directly set the current step
-  const incrementStep = () => {
-    const newStep = currentStep + 1;
-    setCurrentStep(newStep);
-  };
-  
   const handleNextStep = () => {
     setSelectedResponse(null);
     setShowFeedback(false);
@@ -93,7 +87,8 @@ const InteractiveScenario: React.FC<InteractiveScenarioProps> = ({ scenarioConte
       }
     } else {
       // Move to the next step
-      incrementStep();
+      const newStep = currentStep + 1;
+      setCurrentStep(newStep);
     }
   };
   
