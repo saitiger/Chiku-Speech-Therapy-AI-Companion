@@ -1,0 +1,1 @@
+Add missing assests to frontend
