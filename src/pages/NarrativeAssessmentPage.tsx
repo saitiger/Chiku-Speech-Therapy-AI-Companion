@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useScenario } from '@/context/ScenarioContext';
+import { ScenarioProvider } from '@/context/ScenarioContext';
 import Header from '@/components/Header';
 import NarrativeAssessment from '@/components/NarrativeAssessment';
 import FeedbackDisplay from '@/components/FeedbackDisplay';
@@ -8,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const NarrativeAssessmentPage: React.FC = () => {
+const NarrativeAssessmentContent: React.FC = () => {
   const { feedback, resetScenario } = useScenario();
   const navigate = useNavigate();
   
@@ -53,6 +54,14 @@ const NarrativeAssessmentPage: React.FC = () => {
         <p>Speech Stars Playtime Pal - Helping children practice speech skills through fun activities!</p>
       </footer>
     </div>
+  );
+};
+
+const NarrativeAssessmentPage: React.FC = () => {
+  return (
+    <ScenarioProvider>
+      <NarrativeAssessmentContent />
+    </ScenarioProvider>
   );
 };
 
