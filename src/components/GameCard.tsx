@@ -2,7 +2,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { GameCard as GameCardType } from '@/types';
-import { Emoji } from 'lucide-react';
 
 interface GameCardProps {
   game: GameCardType;
@@ -24,7 +23,9 @@ const GameCard: React.FC<GameCardProps> = ({ game }) => {
           ) : game.emoji ? (
             <span className="text-7xl">{game.emoji}</span>
           ) : (
-            <Emoji size={64} />
+            <div className="flex items-center justify-center w-full h-full bg-gray-100">
+              <span className="text-gray-400 text-lg">No image</span>
+            </div>
           )}
         </div>
         <div className="p-4">
