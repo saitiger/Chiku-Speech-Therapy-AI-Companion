@@ -45,7 +45,7 @@ const TextBubble = styled.div`
 const NarrativeAssessment: React.FC = () => {
   const [showPenguin, setShowPenguin] = useState(false);
   const [showBubble, setShowBubble] = useState(false);
-  const [childName, setChildName] = useState('Friend');
+  const [childName, setChildName] = useState('Radhika');
   
   useEffect(() => {
     setTimeout(() => setShowPenguin(true), 400);

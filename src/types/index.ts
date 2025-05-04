@@ -1,4 +1,3 @@
-
 // Define types for our application
 
 export interface Scenario {
@@ -16,6 +15,7 @@ export interface ScenarioDetails {
   prompt: string;
   imageUrl?: string;
   character: Character;
+  useDemo?: boolean; // New property to indicate whether to use the demo scenario
   difficultyLevels?: DifficultyLevel[];
   targetSkills?: TargetSkill[];
 }

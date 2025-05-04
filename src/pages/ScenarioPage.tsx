@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useScenario } from '@/context/ScenarioContext';
 import ResponseInput from '@/components/ResponseInput';
 import FeedbackDisplay from '@/components/FeedbackDisplay';
-import DifficultySelector from '@/components/DifficultySelector';
 import InteractiveScenario from '@/components/InteractiveScenario';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,12 @@ const ScenarioPage: React.FC = () => {
   // Load scenario markdown when component mounts or scenario changes
   useEffect(() => {
     const fetchScenarioContent = async () => {
-      const markdown = await loadScenarioMarkdown();
+      if (!activeScenario) return;
+      
+      // Check if this scenario should use the demo content
+      const useDemo = 'useDemo' in activeScenario && activeScenario.useDemo === true;
+      const markdown = await loadScenarioMarkdown(useDemo ? 'cafe' : undefined);
+      
       if (markdown) {
         const parsed = parseScenarioMarkdown(markdown);
         setScenarioContent(parsed);
@@ -62,15 +66,14 @@ const ScenarioPage: React.FC = () => {
       <div className="w-full mb-8">
         <Card className="bg-speech-light border-none shadow-md">
           <div className="p-6">
-            <h2 className="text-xl font-bold text-speech-dark mb-2">
+            <h2 className="text-xl font-bold text-speech-dark mb-4">
               {activeScenario.title}
             </h2>
             <p className="text-speech-dark/80 mb-4">
               {activeScenario.instruction}
             </p>
             
-            {/* Difficulty level selector */}
-            <DifficultySelector />
+            {/* Removing the difficulty selector as requested */}
           </div>
         </Card>
       </div>

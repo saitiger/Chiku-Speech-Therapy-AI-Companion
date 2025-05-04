@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useScenario } from '@/context/ScenarioContext';
 import { ResponseOption, DifficultyLevelContent } from '@/types';
@@ -87,8 +88,7 @@ const InteractiveScenario: React.FC<InteractiveScenarioProps> = ({ scenarioConte
       }
     } else {
       // Move to the next step
-      const newStep = currentStep + 1;
-      setCurrentStep(newStep);
+      setCurrentStep(currentStep + 1);
     }
   };
   

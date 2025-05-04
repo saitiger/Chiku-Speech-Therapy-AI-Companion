@@ -15,7 +15,7 @@ const games = [
     id: 'narrative-assessment',
     title: 'Penguin Story Time',
     description: 'Help the penguin by telling a story about a birthday party!',
-    imagePath: '/assests/mini-game-assets/frontend/src/penguin.png', // Updated path to penguin image
+    imagePath: '/assests/mini-game-assets/frontend/src/penguin.png', 
     path: '/narrative-assessment',
     backgroundColor: 'bg-gradient-to-br from-blue-100 to-blue-50'
   }
@@ -27,15 +27,21 @@ const HomePage: React.FC = () => {
   
   const handleSelectScenario = async (scenario: Scenario) => {
     try {
-      // Fetch scenario details
-      const response = await fetch(`/data/scenario-${scenario.id}.json`);
-      if (!response.ok) {
-        // If no JSON file exists, use the hardcoded details from scenarios.ts
+      if (scenario.id === "cafe") {
+        // Special handling for cafe scenario to use the demo
         const { scenarioDetails } = await import('@/data/scenarios');
         setActiveScenario(scenarioDetails[scenario.id]);
       } else {
-        const scenarioDetails = await response.json();
-        setActiveScenario(scenarioDetails);
+        // For other scenarios, try to get from JSON file first
+        const response = await fetch(`/data/scenario-${scenario.id}.json`);
+        if (!response.ok) {
+          // If no JSON file exists, use the hardcoded details from scenarios.ts
+          const { scenarioDetails } = await import('@/data/scenarios');
+          setActiveScenario(scenarioDetails[scenario.id]);
+        } else {
+          const scenarioDetails = await response.json();
+          setActiveScenario(scenarioDetails);
+        }
       }
       
       // Navigate to scenario page
@@ -48,9 +54,6 @@ const HomePage: React.FC = () => {
       navigate('/scenario');
     }
   };
-  
-  // Get the user's name or use a default
-  const userName = progressData?.settings?.userName || 'Friend';
   
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-speech-light">
@@ -86,7 +89,7 @@ const HomePage: React.FC = () => {
           
           {/* Welcome message */}
           <div className="bg-gradient-to-r from-speech-purple to-speech-blue rounded-xl p-6 mb-8 text-white shadow-md">
-            <h2 className="text-xl font-bold mb-2">Welcome back, {userName}!</h2>
+            <h2 className="text-xl font-bold mb-2">Welcome back, Radhika!</h2>
             <p>Continue practicing your speech skills with fun activities and games.</p>
           </div>
           

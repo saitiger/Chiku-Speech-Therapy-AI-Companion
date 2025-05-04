@@ -1,4 +1,3 @@
-
 import { Scenario, ScenarioDetails } from "@/types";
 
 // Main scenario cards for homepage selection
@@ -24,6 +23,13 @@ export const scenarios: Scenario[] = [
     iconName: "😊",
     backgroundClass: "bg-gradient-to-br from-speech-green to-speech-blue",
   },
+  {
+    id: "cafe",
+    title: "Ordering at Cafe",
+    description: "Practice ordering your favorite drink at a café and handling different situations.",
+    iconName: "☕",
+    backgroundClass: "bg-gradient-to-br from-speech-orange to-speech-yellow",
+  }
 ];
 
 // Character definitions
@@ -40,6 +46,10 @@ const characters = {
     name: "Nova",
     imageUrl: "/nova.png", // We'll create this placeholder
   },
+  barista: {
+    name: "Barista",
+    imageUrl: "/stella.png", // Using Stella as the barista character for now
+  }
 };
 
 // Detailed scenario information
@@ -66,6 +76,14 @@ export const scenarioDetails: Record<string, ScenarioDetails> = {
     prompt: "How would you tell someone about your feelings in this situation?",
     character: characters.nova,
   },
+  "cafe": {
+    id: "cafe",
+    title: "Ordering at Cafe",
+    instruction: "You're at a café counter. The barista is ready to take your order. Practice ordering a drink and handling different situations.",
+    prompt: "What would you like to order at the café?",
+    character: characters.barista,
+    useDemo: true, // Flag to indicate this scenario should use the demo content
+  }
 };
 
 // Example user responses for simulation
@@ -85,4 +103,9 @@ export const sampleResponses: Record<string, string[]> = {
     "I would say I'm feeling a little upset because I wanted to join in the game. Could you help me find someone to play with?",
     "I feel disappointed that they didn't want to play with me. I would tell my friend that it made me feel lonely and ask if they want to play something together instead."
   ],
+  "cafe": [
+    "I would like a small hot chocolate, please.",
+    "Yes, please. I love whipped cream on hot chocolate.",
+    "Excuse me, there seems to be a mix-up. I ordered a hot chocolate with whipped cream, not coffee."
+  ]
 };
