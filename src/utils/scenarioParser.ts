@@ -1,3 +1,4 @@
+
 import { DifficultyLevel, DifficultyLevelContent, ResponseOption, ScenarioStep } from '@/types';
 
 export const parseScenarioMarkdown = (markdown: string): Record<DifficultyLevel, DifficultyLevelContent> => {
@@ -228,7 +229,7 @@ function generateFallbackScenario(): string {
         {
           "text": "Yes.",
           "quality": "Basic",
-          "feedback": "Good clear answer. You could add \\"please\\" to be more polite"
+          "feedback": "Good clear answer. You could add \\\"please\\\" to be more polite"
         },
         {
           "text": "Yes, please.",
@@ -330,3 +331,4 @@ You're at a busy café, standing at the counter to order a drink.
 **Excellent**
 *Excellent! You explained the problem clearly, politely, and with specific details*
 `;
+}
