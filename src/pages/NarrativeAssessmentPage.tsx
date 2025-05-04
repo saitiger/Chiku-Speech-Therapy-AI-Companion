@@ -29,7 +29,7 @@ const NarrativeAssessmentContent: React.FC = () => {
           </div>
           
           <div className="w-full mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-speech-dark mb-2">Tell me about the birthday party from last week</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-speech-dark mb-2">Tell me about a birthday you remember</h1>
             <p className="text-speech-dark/80">The penguin is excited to hear your story!</p>
           </div>
           
