@@ -1,4 +1,3 @@
-
 import { DifficultyLevel, DifficultyLevelContent, ResponseOption, ScenarioStep } from '@/types';
 
 export const parseScenarioMarkdown = (markdown: string): Record<DifficultyLevel, DifficultyLevelContent> => {
@@ -157,7 +156,7 @@ export const loadScenarioMarkdown = async (scenarioId?: string): Promise<string>
   try {
     // If scenarioId is "cafe", load the demo scenario
     if (scenarioId === "cafe") {
-      const demoResponse = await fetch('/assests/demo-scenario.md');
+      const demoResponse = await fetch('/assets/demo-scenario.md');
       if (demoResponse.ok) {
         console.log("Using cafe demo scenario data");
         return await demoResponse.text();
@@ -331,4 +330,3 @@ You're at a busy café, standing at the counter to order a drink.
 **Excellent**
 *Excellent! You explained the problem clearly, politely, and with specific details*
 `;
-}
