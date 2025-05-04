@@ -1,58 +1,31 @@
-
 import { FeedbackResponse } from '@/types';
 import { toast } from 'sonner';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Check if Supabase environment variables are set
-const isSupabaseConfigured = supabaseUrl && supabaseAnonKey;
-
-// Create Supabase client if configured
-let supabase: any = null;
-if (isSupabaseConfigured) {
-  supabase = createClient(supabaseUrl, supabaseAnonKey);
-}
+import { supabase } from '@/integrations/supabase/client';
 
 // Speech-to-text conversion using Groq Whisper API via Supabase Edge Function
 export const convertSpeechToText = async (audioBlob: Blob): Promise<string> => {
   try {
-    // If Supabase is configured, use the Edge Function
-    if (isSupabaseConfigured && supabase) {
-      try {
-        console.log('Converting speech to text using Groq Whisper API');
-        // Convert audio blob to base64
-        const base64Audio = await blobToBase64(audioBlob);
-        console.log('Audio converted to base64, length:', base64Audio.length);
-        
-        // Call the Edge Function for speech-to-text conversion
-        const { data, error } = await supabase.functions.invoke('groq-whisper', {
-          body: { audio: base64Audio }
-        });
+    console.log('Converting speech to text using Groq Whisper API');
+    // Convert audio blob to base64
+    const base64Audio = await blobToBase64(audioBlob);
+    console.log('Audio converted to base64, length:', base64Audio.length);
+    
+    // Call the Edge Function for speech-to-text conversion
+    const { data, error } = await supabase.functions.invoke('groq-whisper', {
+      body: { audio: base64Audio }
+    });
 
-        if (error) {
-          console.error('Supabase Edge Function error (speech-to-text):', error);
-          toast.error('Unable to convert speech to text. Please try typing instead.');
-          return '';
-        }
-
-        console.log('Transcription result:', data);
-        return data.text || '';
-      } catch (supabaseError) {
-        console.error('Error calling Supabase Edge Function (speech-to-text):', supabaseError);
-        toast.error('Unable to convert speech to text. Please try typing instead.');
-        return '';
-      }
-    } else {
-      // If Supabase is not configured, show a message
-      console.log('Supabase not configured. Speech-to-text conversion unavailable.');
-      toast.error('Speech-to-text requires Supabase configuration.');
+    if (error) {
+      console.error('Supabase Edge Function error (speech-to-text):', error);
+      toast.error('Unable to convert speech to text. Please try typing instead.');
       return '';
     }
-  } catch (error) {
-    console.error("Error in speech-to-text conversion:", error);
-    toast.error("Oops! Something went wrong with speech recognition.");
+
+    console.log('Transcription result:', data);
+    return data.text || '';
+  } catch (supabaseError) {
+    console.error('Error calling Supabase Edge Function (speech-to-text):', supabaseError);
+    toast.error('Unable to convert speech to text. Please try typing instead.');
     return '';
   }
 };
@@ -78,58 +51,27 @@ export const evaluateResponse = async (
   scenarioContext: string
 ): Promise<FeedbackResponse> => {
   try {
-    // If Supabase is configured, try to use the Edge Function
-    if (isSupabaseConfigured && supabase) {
-      try {
-        // Call the Supabase Edge Function that handles Claude API with expanded rubric
-        const { data, error } = await supabase.functions.invoke('claude-evaluation', {
-          body: {
-            childResponse,
-            scenarioContext
-          }
-        });
-
-        if (error) {
-          console.error('Supabase Edge Function error:', error);
-          toast.error('Unable to connect to Claude. Using simulated feedback instead.');
-          // Fall back to simulation if Edge Function fails
-          return simulateFeedback(childResponse, scenarioContext);
-        }
-
-        return data as FeedbackResponse;
-      } catch (supabaseError) {
-        console.error('Error calling Supabase Edge Function:', supabaseError);
-        toast.error('Unable to connect to Claude. Using simulated feedback instead.');
-        // Fall back to simulation if there's an error
-        return simulateFeedback(childResponse, scenarioContext);
+    // Call the Supabase Edge Function that handles Claude API with expanded rubric
+    const { data, error } = await supabase.functions.invoke('claude-evaluation', {
+      body: {
+        childResponse,
+        scenarioContext
       }
-    } else {
-      // If Supabase is not configured, use the simulation
-      console.log('Supabase not configured. Using simulated feedback.');
+    });
+
+    if (error) {
+      console.error('Supabase Edge Function error:', error);
+      toast.error('Unable to connect to Claude. Using simulated feedback instead.');
+      // Fall back to simulation if Edge Function fails
       return simulateFeedback(childResponse, scenarioContext);
     }
-  } catch (error) {
-    console.error("Error evaluating response:", error);
-    toast.error("Oops! Something went wrong evaluating your response.");
-    
-    // Return fallback feedback
-    return {
-      // Speech & Language Skills
-      articulation: 3,
-      fluency: 3,
-      vocabulary: 3,
-      grammar: 3,
-      
-      // Social-Communication Skills
-      communication: 3,
-      empathy: 3,
-      cooperation: 3,
-      selfControl: 3,
-      
-      summary: "Thank you for your response!",
-      suggestion: "Let's try again with a clearer voice.",
-      encouragement: "You're doing great work today!"
-    };
+
+    return data as FeedbackResponse;
+  } catch (supabaseError) {
+    console.error('Error calling Supabase Edge Function:', supabaseError);
+    toast.error('Unable to connect to Claude. Using simulated feedback instead.');
+    // Fall back to simulation if there's an error
+    return simulateFeedback(childResponse, scenarioContext);
   }
 };
 

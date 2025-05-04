@@ -11,15 +11,17 @@ interface TranscriptionRequest {
   audio: string; // base64 encoded audio
 }
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info, apikey",
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
+      headers: corsHeaders,
       status: 204,
     });
   }
@@ -32,7 +34,7 @@ serve(async (req) => {
         JSON.stringify({ error: "Groq API key not configured" }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" },
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
@@ -40,7 +42,8 @@ serve(async (req) => {
     console.log("Starting transcription request");
     
     // Parse request body
-    const { audio } = await req.json() as TranscriptionRequest;
+    const requestData = await req.json();
+    const { audio } = requestData as TranscriptionRequest;
     
     if (!audio) {
       console.error("Missing audio data");
@@ -48,7 +51,7 @@ serve(async (req) => {
         JSON.stringify({ error: "Missing audio data" }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" },
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
@@ -90,7 +93,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ text: transcriptionData.text }),
         {
-          headers: { "Content-Type": "application/json" },
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
         }
       );
@@ -105,7 +108,7 @@ serve(async (req) => {
       JSON.stringify({ error: error.message || "Unknown error occurred" }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }

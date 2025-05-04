@@ -1,9 +1,12 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Button } from "@/components/ui/button";
 import { Mic, Square, Play } from 'lucide-react';
 import { useScenario } from '@/context/ScenarioContext';
 import { convertSpeechToText } from '@/services/api';
+import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
 
 const AntarcticBackdrop = styled.div`
   width: 100%;
@@ -51,6 +54,7 @@ const NarrativeAssessment: React.FC = () => {
   const [childName, setChildName] = useState('Radhika');
   const [isRecording, setIsRecording] = useState(false);
   const [recordedAudio, setRecordedAudio] = useState<string | null>(null);
+  const [transcriptionInProgress, setTranscriptionInProgress] = useState(false);
   
   // Refs for audio recording
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -76,28 +80,39 @@ const NarrativeAssessment: React.FC = () => {
       };
       
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const audioUrl = URL.createObjectURL(audioBlob);
         setRecordedAudio(audioUrl);
         
         // Process audio with speech-to-text API
         try {
           setIsLoading(true);
+          setTranscriptionInProgress(true);
+          
+          console.log("Sending audio for transcription, blob size:", audioBlob.size);
           const transcribedText = await convertSpeechToText(audioBlob);
+          
           if (transcribedText) {
             setUserResponse(transcribedText);
+            toast.success("Audio successfully transcribed!");
+          } else {
+            toast.error("Could not transcribe audio. Please try again.");
           }
         } catch (error) {
           console.error("Error processing audio:", error);
+          toast.error("Error processing audio. Please try again.");
         } finally {
           setIsLoading(false);
+          setTranscriptionInProgress(false);
         }
       };
       
       mediaRecorder.start();
       setIsRecording(true);
+      toast.info("Recording started. Speak clearly!");
     } catch (error) {
       console.error("Error starting recording:", error);
+      toast.error("Could not access microphone. Please check permissions.");
     }
   };
 
@@ -106,6 +121,7 @@ const NarrativeAssessment: React.FC = () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      toast.info("Processing your recording...");
       
       // Release microphone access
       if (mediaRecorderRef.current.stream) {
@@ -145,6 +161,7 @@ const NarrativeAssessment: React.FC = () => {
           <Button
             onClick={stopRecording}
             className="bg-red-500 hover:bg-red-600 text-white rounded-full w-20 h-20 flex items-center justify-center mb-4"
+            disabled={transcriptionInProgress}
           >
             <Square size={24} />
           </Button>
@@ -153,12 +170,14 @@ const NarrativeAssessment: React.FC = () => {
             <Button
               onClick={playRecording}
               className="bg-green-500 hover:bg-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center"
+              disabled={transcriptionInProgress}
             >
               <Play size={24} />
             </Button>
             <Button
               onClick={startRecording}
               className="bg-red-500 hover:bg-red-600 text-white rounded-full w-16 h-16 flex items-center justify-center"
+              disabled={transcriptionInProgress}
             >
               <Mic size={24} />
             </Button>
@@ -167,12 +186,15 @@ const NarrativeAssessment: React.FC = () => {
           <Button
             onClick={startRecording}
             className="bg-red-500 hover:bg-red-600 text-white rounded-full w-20 h-20 flex items-center justify-center mb-4"
+            disabled={transcriptionInProgress}
           >
             <Mic size={24} />
           </Button>
         )}
         <p className="text-gray-700">
-          {isRecording ? "Recording... Click to stop" : "Press to start recording"}
+          {isRecording ? "Recording... Click to stop" : 
+           transcriptionInProgress ? "Processing..." :
+           "Press to start recording"}
         </p>
       </div>
 

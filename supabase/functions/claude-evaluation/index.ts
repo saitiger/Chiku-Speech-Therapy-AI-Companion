@@ -17,15 +17,17 @@ interface ApiError {
   details?: string;
 }
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, x-client-info, apikey",
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
+      headers: corsHeaders,
       status: 204,
     });
   }
@@ -38,20 +40,21 @@ serve(async (req) => {
         JSON.stringify({ error: "Claude API key not configured" }),
         {
           status: 500,
-          headers: { "Content-Type": "application/json" },
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
 
     // Parse request body
-    const { childResponse, scenarioContext } = await req.json() as EvaluationRequest;
+    const requestData = await req.json();
+    const { childResponse, scenarioContext } = requestData as EvaluationRequest;
     
     if (!childResponse || !scenarioContext) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" },
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
     }
@@ -153,7 +156,7 @@ Important: Return ONLY the JSON object, nothing else, so it can be parsed direct
       console.log("Parsed feedback data successfully");
       
       return new Response(JSON.stringify(feedbackData), {
-        headers: { "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     } catch (parseError) {
@@ -167,7 +170,7 @@ Important: Return ONLY the JSON object, nothing else, so it can be parsed direct
       JSON.stringify({ error: error.message || "Unknown error occurred" }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
   }
