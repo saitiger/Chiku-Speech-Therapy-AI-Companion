@@ -8,14 +8,16 @@ import { Button } from '@/components/ui/button';
 import { BarChart, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
+
 const games = [{
   id: 'narrative-assessment',
   title: 'Penguin Story Time',
   description: 'Help the penguin by telling a story about a birthday party!',
-  imagePath: '/assests/mini-game-assets/frontend/src/penguin.png',
+  imagePath: '/penguin.png',
   path: '/narrative-assessment',
   backgroundColor: 'bg-gradient-to-br from-blue-100 to-blue-50'
 }];
+
 const HomePage: React.FC = () => {
   const {
     setActiveScenario,
