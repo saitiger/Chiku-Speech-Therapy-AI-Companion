@@ -1,3 +1,4 @@
+
 import { DifficultyLevel, DifficultyLevelContent, ResponseOption, ScenarioStep } from '@/types';
 
 export const parseScenarioMarkdown = (markdown: string): Record<DifficultyLevel, DifficultyLevelContent> => {
@@ -330,3 +331,4 @@ You're at a busy café, standing at the counter to order a drink.
 **Excellent**
 *Excellent! You explained the problem clearly, politely, and with specific details*
 `;
+}
