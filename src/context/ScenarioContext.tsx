@@ -1,7 +1,17 @@
 
-import React, { createContext, useState, useContext } from 'react';
-import { ScenarioContextValue, ScenarioDetails, FeedbackResponse } from '@/types';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { ScenarioContextValue, ScenarioDetails, FeedbackResponse, DifficultyLevel, ProgressData, ScenarioMetrics } from '@/types';
 import { toast } from 'sonner';
+
+// Default progress data
+const defaultProgressData: ProgressData = {
+  scenarios: {},
+  settings: {
+    defaultDifficulty: 'beginner',
+    userName: 'Friend',
+    age: 7
+  }
+};
 
 // Create a context for managing scenario state
 const ScenarioContext = createContext<ScenarioContextValue | undefined>(undefined);
@@ -12,11 +22,62 @@ export const ScenarioProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [feedback, setFeedback] = useState<FeedbackResponse | null>(null);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>('beginner');
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [progressData, setProgressData] = useState<ProgressData>(() => {
+    // Load progress from localStorage if available
+    const savedProgress = localStorage.getItem('speechTherapyProgress');
+    return savedProgress ? JSON.parse(savedProgress) : defaultProgressData;
+  });
+
+  // Save progress to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('speechTherapyProgress', JSON.stringify(progressData));
+  }, [progressData]);
 
   // Reset the current scenario
   const resetScenario = () => {
     setUserResponse('');
     setFeedback(null);
+    setCurrentStep(1);
+  };
+
+  // Update progress data for a scenario
+  const updateProgress = (scenarioId: string, metrics: Partial<ScenarioMetrics>) => {
+    setProgressData(prevData => {
+      const updatedScenarios = { ...prevData.scenarios };
+      
+      // Initialize scenario data if it doesn't exist
+      if (!updatedScenarios[scenarioId]) {
+        updatedScenarios[scenarioId] = {
+          attempts: 0,
+          completions: 0,
+          averageScores: {
+            articulation: 0,
+            fluency: 0,
+            vocabulary: 0,
+            grammar: 0,
+            communication: 0,
+            empathy: 0,
+            cooperation: 0,
+            selfControl: 0
+          },
+          lastCompletedAt: new Date().toISOString()
+        };
+      }
+      
+      // Update with new metrics
+      updatedScenarios[scenarioId] = {
+        ...updatedScenarios[scenarioId],
+        ...metrics,
+        lastCompletedAt: new Date().toISOString()
+      };
+      
+      return {
+        ...prevData,
+        scenarios: updatedScenarios
+      };
+    });
   };
 
   // Simulate voice input for demo purposes
@@ -54,6 +115,12 @@ export const ScenarioProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setIsLoading,
         resetScenario,
         simulateVoiceInput,
+        selectedDifficulty,
+        setSelectedDifficulty,
+        currentStep,
+        setCurrentStep,
+        progressData,
+        updateProgress
       }}
     >
       {children}

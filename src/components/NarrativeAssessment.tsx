@@ -5,7 +5,21 @@ import { toast } from 'sonner';
 import { useScenario } from '@/context/ScenarioContext';
 import { convertSpeechToText, generateClaudeFeedback } from '@/services/api';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import styled from 'styled-components';
+
+// Import penguin fix styles from assets
+const PenguinContainer = styled.div`
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  width: 200px;
+  height: 300px;  /* Increased from 200px to 300px for greater height */
+  animation: waddle 2s cubic-bezier(.68,-0.55,.27,1.55) forwards;
+  @keyframes waddle {
+    from { left: -220px; }
+    to { left: 50vw; }
+  }
+`;
 
 const NarrativeAssessment: React.FC = () => {
   // State variables
@@ -13,10 +27,19 @@ const NarrativeAssessment: React.FC = () => {
   const [showQuestion, setShowQuestion] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordedAudio, setRecordedAudio] = useState<string | null>(null);
-  const [childName, setChildName] = useState("Friend"); // Default name
+  const [showPenguin, setShowPenguin] = useState(false);
   
   // Get scenario context
-  const { setIsLoading, setUserResponse, setFeedback, isLoading } = useScenario();
+  const { 
+    setIsLoading, 
+    setUserResponse, 
+    setFeedback, 
+    isLoading, 
+    progressData 
+  } = useScenario();
+  
+  // Get user name from progress data
+  const childName = progressData.settings.userName || "Friend";
   
   // Refs for audio recording
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -26,6 +49,7 @@ const NarrativeAssessment: React.FC = () => {
   // Animate penguin walking in
   useEffect(() => {
     const walkIn = setTimeout(() => {
+      setShowPenguin(true);
       const animation = setInterval(() => {
         setPenguinPosition(prev => {
           if (prev >= 100) {
@@ -153,32 +177,21 @@ const NarrativeAssessment: React.FC = () => {
         </div>
       </div>
       
-      {/* Penguin character */}
-      <div 
-        className="absolute bottom-40"
-        style={{ left: `${penguinPosition}%`, transition: 'left 0.05s ease-in-out' }}
-      >
-        <div className="relative w-32 h-36 md:w-40 md:h-48">
-          {/* Penguin body */}
-          <div className="absolute bottom-0 w-24 h-32 md:w-32 md:h-40 bg-black rounded-t-full rounded-b-3xl"></div>
-          <div className="absolute bottom-0 left-4 md:left-5 w-16 h-24 md:w-22 md:h-32 bg-white rounded-t-full rounded-b-3xl"></div>
-          
-          {/* Penguin face */}
-          <div className="absolute top-2 md:top-3 left-6 md:left-8 w-12 h-12 md:w-16 md:h-16 bg-black rounded-full">
-            <div className="absolute top-4 md:top-5 left-2 md:left-3 w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"></div>
-            <div className="absolute top-4 md:top-5 right-2 md:right-3 w-2 h-2 md:w-3 md:h-3 bg-white rounded-full"></div>
-            <div className="absolute top-8 md:top-10 left-4 md:left-5 w-4 h-3 md:w-6 md:h-4 bg-orange-400 rounded-b-full"></div>
-          </div>
-          
-          {/* Penguin flippers */}
-          <div className="absolute top-12 md:top-14 left-0 w-6 h-16 md:w-8 md:h-20 bg-black rounded-l-full transform -rotate-12"></div>
-          <div className="absolute top-12 md:top-14 right-2 md:right-4 w-6 h-16 md:w-8 md:h-20 bg-black rounded-r-full transform rotate-12"></div>
-          
-          {/* Penguin feet */}
-          <div className="absolute bottom-0 left-6 md:left-8 w-6 h-3 md:w-8 md:h-4 bg-orange-400 rounded-full"></div>
-          <div className="absolute bottom-0 right-6 md:right-8 w-6 h-3 md:w-8 md:h-4 bg-orange-400 rounded-full"></div>
-        </div>
-      </div>
+      {/* Penguin character - updated with styled component */}
+      {showPenguin && (
+        <PenguinContainer>
+          <img 
+            src="/penguin.png" 
+            alt="Penguin" 
+            style={{ 
+              width: '100%', 
+              height: '100%',
+              objectFit: 'contain',  /* This ensures the image maintains its aspect ratio */
+              objectPosition: 'bottom'  /* This anchors the image to the bottom of the container */
+            }} 
+          />
+        </PenguinContainer>
+      )}
       
       {/* Speech bubble question */}
       {showQuestion && (
