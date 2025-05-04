@@ -1,52 +1,84 @@
 
-import React, { useEffect } from 'react';
-import CharacterBubble from '@/components/CharacterBubble';
+import React, { useEffect, useState } from 'react';
+import { useScenario } from '@/context/ScenarioContext';
 import ResponseInput from '@/components/ResponseInput';
 import FeedbackDisplay from '@/components/FeedbackDisplay';
-import { useScenario } from '@/context/ScenarioContext';
-import { Card, CardContent } from '@/components/ui/card';
+import DifficultySelector from '@/components/DifficultySelector';
+import InteractiveScenario from '@/components/InteractiveScenario';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { loadScenarioMarkdown, parseScenarioMarkdown } from '@/utils/scenarioParser';
+import { DifficultyLevelContent } from '@/types';
 
 const ScenarioPage: React.FC = () => {
-  const { activeScenario, feedback, isLoading } = useScenario();
+  const { 
+    activeScenario, 
+    feedback, 
+    isLoading, 
+    selectedDifficulty, 
+    resetScenario 
+  } = useScenario();
   
+  const [scenarioContent, setScenarioContent] = useState<Record<string, DifficultyLevelContent> | null>(null);
+  const navigate = useNavigate();
+  
+  // Load scenario markdown when component mounts or scenario changes
   useEffect(() => {
+    const fetchScenarioContent = async () => {
+      const markdown = await loadScenarioMarkdown();
+      if (markdown) {
+        const parsed = parseScenarioMarkdown(markdown);
+        setScenarioContent(parsed);
+      }
+    };
+    
+    fetchScenarioContent();
     // Scroll to top when scenario changes
     window.scrollTo(0, 0);
   }, [activeScenario]);
+  
+  const handleBackToHome = () => {
+    resetScenario();
+    navigate('/');
+  };
   
   if (!activeScenario) return null;
   
   return (
     <div className="w-full max-w-3xl mx-auto p-4 flex flex-col items-center">
+      <div className="w-full mb-4">
+        <Button 
+          variant="ghost" 
+          className="flex items-center gap-2"
+          onClick={handleBackToHome}
+        >
+          <ArrowLeft size={16} />
+          <span>Back to Home</span>
+        </Button>
+      </div>
+      
       <div className="w-full mb-8">
         <Card className="bg-speech-light border-none shadow-md">
-          <CardContent className="p-6">
+          <div className="p-6">
             <h2 className="text-xl font-bold text-speech-dark mb-2">
-              {activeScenario.instruction}
+              {activeScenario.title}
             </h2>
-          </CardContent>
+            <p className="text-speech-dark/80 mb-4">
+              {activeScenario.instruction}
+            </p>
+            
+            {/* Difficulty level selector */}
+            <DifficultySelector />
+          </div>
         </Card>
       </div>
       
-      {activeScenario.imageUrl && (
-        <div className="w-full mb-8 flex justify-center">
-          <div className="w-full max-w-md bg-white p-3 rounded-xl shadow-md">
-            <img 
-              src={activeScenario.imageUrl} 
-              alt="Scenario illustration" 
-              className="w-full rounded-lg object-cover aspect-video"
-            />
-          </div>
-        </div>
-      )}
-      
-      <CharacterBubble
-        character={activeScenario.character}
-        message={activeScenario.prompt}
-      />
-      
       {feedback ? (
         <FeedbackDisplay />
+      ) : scenarioContent && scenarioContent[selectedDifficulty] ? (
+        <InteractiveScenario scenarioContent={scenarioContent[selectedDifficulty]} />
       ) : (
         <ResponseInput />
       )}

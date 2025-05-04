@@ -7,14 +7,18 @@ import { useScenario } from '@/context/ScenarioContext';
 
 interface ScenarioCardProps {
   scenario: Scenario;
+  onSelect?: () => void;
 }
 
-const ScenarioCard: React.FC<ScenarioCardProps> = ({ scenario }) => {
+const ScenarioCard: React.FC<ScenarioCardProps> = ({ scenario, onSelect }) => {
   const { setActiveScenario } = useScenario();
   
   const handleCardClick = () => {
     const details = scenarioDetails[scenario.id];
     setActiveScenario(details);
+    if (onSelect) {
+      onSelect();
+    }
   };
   
   return (
