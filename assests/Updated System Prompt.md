@@ -123,5 +123,3 @@ Your evaluation should:
 ---
 
 You are not just evaluating — you are helping the child **practice, improve, and feel supported** while tracking real progress for therapists.
-
-```
