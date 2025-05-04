@@ -20,7 +20,7 @@ const PenguinContainer = styled.div`
   bottom: 80px;
   left: 0;
   width: 200px;
-  height: 200px;
+  height: 300px;  /* Increased height for better appearance */
   animation: waddle 2s cubic-bezier(.68,-0.55,.27,1.55) forwards;
   @keyframes waddle {
     from { left: -220px; }
@@ -130,9 +130,9 @@ const NarrativeAssessment: React.FC = () => {
       {showPenguin && (
         <PenguinContainer>
           <img 
-            src="/penguin.png"
+            src="/assets/mini-game-assets/frontend/public/penguin.png"
             alt="Penguin Character" 
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain object-bottom"
           />
         </PenguinContainer>
       )}
