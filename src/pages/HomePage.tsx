@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Scenario } from '@/types';
 import ScenarioCard from '@/components/ScenarioCard';
@@ -9,54 +8,56 @@ import { Button } from '@/components/ui/button';
 import { BarChart, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
-
-const games = [
-  {
-    id: 'narrative-assessment',
-    title: 'Penguin Story Time',
-    description: 'Help the penguin by telling a story about a birthday party!',
-    imagePath: '/assests/mini-game-assets/frontend/src/penguin.png', 
-    path: '/narrative-assessment',
-    backgroundColor: 'bg-gradient-to-br from-blue-100 to-blue-50'
-  }
-];
-
+const games = [{
+  id: 'narrative-assessment',
+  title: 'Penguin Story Time',
+  description: 'Help the penguin by telling a story about a birthday party!',
+  imagePath: '/assests/mini-game-assets/frontend/src/penguin.png',
+  path: '/narrative-assessment',
+  backgroundColor: 'bg-gradient-to-br from-blue-100 to-blue-50'
+}];
 const HomePage: React.FC = () => {
-  const { setActiveScenario, progressData } = useScenario();
+  const {
+    setActiveScenario,
+    progressData
+  } = useScenario();
   const navigate = useNavigate();
-  
   const handleSelectScenario = async (scenario: Scenario) => {
     try {
       if (scenario.id === "cafe") {
         // Special handling for cafe scenario to use the demo
-        const { scenarioDetails } = await import('@/data/scenarios');
+        const {
+          scenarioDetails
+        } = await import('@/data/scenarios');
         setActiveScenario(scenarioDetails[scenario.id]);
       } else {
         // For other scenarios, try to get from JSON file first
         const response = await fetch(`/data/scenario-${scenario.id}.json`);
         if (!response.ok) {
           // If no JSON file exists, use the hardcoded details from scenarios.ts
-          const { scenarioDetails } = await import('@/data/scenarios');
+          const {
+            scenarioDetails
+          } = await import('@/data/scenarios');
           setActiveScenario(scenarioDetails[scenario.id]);
         } else {
           const scenarioDetails = await response.json();
           setActiveScenario(scenarioDetails);
         }
       }
-      
+
       // Navigate to scenario page
       navigate('/scenario');
     } catch (error) {
       console.error('Error loading scenario:', error);
       // Fall back to hardcoded scenarios
-      const { scenarioDetails } = await import('@/data/scenarios');
+      const {
+        scenarioDetails
+      } = await import('@/data/scenarios');
       setActiveScenario(scenarioDetails[scenario.id]);
       navigate('/scenario');
     }
   };
-  
-  return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-speech-light">
+  return <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-speech-light">
       <Header />
       
       <main className="flex-1 px-4 py-6">
@@ -67,20 +68,12 @@ const HomePage: React.FC = () => {
             </h1>
             
             <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 border-speech-purple text-speech-purple hover:bg-speech-purple/5"
-                onClick={() => navigate('/progress')}
-              >
+              <Button variant="outline" className="flex items-center gap-2 border-speech-purple text-speech-purple hover:bg-speech-purple/5" onClick={() => navigate('/progress')}>
                 <BarChart size={16} />
                 <span className="hidden sm:inline">Progress</span>
               </Button>
               
-              <Button
-                variant="ghost"
-                className="flex items-center gap-2 text-speech-dark/70"
-                onClick={() => {/* Open settings modal */}}
-              >
+              <Button variant="ghost" className="flex items-center gap-2 text-speech-dark/70" onClick={() => {/* Open settings modal */}}>
                 <Settings size={16} />
                 <span className="hidden sm:inline">Settings</span>
               </Button>
@@ -94,24 +87,16 @@ const HomePage: React.FC = () => {
           </div>
           
           <section className="mb-12">
-            <h2 className="text-2xl font-bold text-speech-dark mb-6">Speech Games</h2>
+            <h2 className="text-2xl font-bold text-speech-dark mb-6">Games</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {games.map(game => (
-                <GameCard key={game.id} game={game} />
-              ))}
+              {games.map(game => <GameCard key={game.id} game={game} />)}
             </div>
           </section>
           
           <section>
             <h2 className="text-2xl font-bold text-speech-dark mb-6">Social Scenarios</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-              {scenarios.map(scenario => (
-                <ScenarioCard 
-                  key={scenario.id}
-                  scenario={scenario}
-                  onSelect={() => handleSelectScenario(scenario)}
-                />
-              ))}
+              {scenarios.map(scenario => <ScenarioCard key={scenario.id} scenario={scenario} onSelect={() => handleSelectScenario(scenario)} />)}
             </div>
           </section>
         </div>
@@ -120,8 +105,6 @@ const HomePage: React.FC = () => {
       <footer className="py-4 px-6 text-center text-sm text-speech-dark/60">
         <p>Speech Stars Playtime Pal - Helping children practice speech skills through fun activities!</p>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default HomePage;
