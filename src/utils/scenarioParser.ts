@@ -117,11 +117,78 @@ export const loadScenarioMarkdown = async (): Promise<string> => {
   try {
     const response = await fetch('/assets/scenario_example_multilevels.md');
     if (!response.ok) {
-      throw new Error('Failed to load scenario markdown');
+      // Provide fallback scenario data when file is not available
+      console.log("Using fallback scenario data");
+      return generateFallbackScenario();
     }
     return await response.text();
   } catch (error) {
     console.error('Error loading scenario markdown:', error);
-    return '';
+    return generateFallbackScenario();
   }
 };
+
+// Generate a basic fallback scenario for the "Friendly Greetings" demo
+function generateFallbackScenario(): string {
+  return `
+## Beginner Level
+
+\`\`\`json
+{
+  "scenario": [
+    { 
+      "step": 1, 
+      "prompt": "You meet a new friend at school. How do you greet them?", 
+      "intent": "Practice basic greeting",
+      "visual_support": "school_playground.png",
+      "audio_prompt": true
+    },
+    { 
+      "step": 2, 
+      "prompt": "Your new friend asks what you like to do for fun. What do you say?", 
+      "intent": "Practice sharing interests",
+      "visual_support": "toys_and_games.png",
+      "audio_prompt": true
+    }
+  ]
+}
+\`\`\`
+
+### Interactive Dialogue Format
+
+**Scene Description:**
+You're at school and see a new student in your class.
+
+**Stella:**
+"Hi there! I'm new to your class. My name is Stella. What's your name?"
+
+**Player Response Options:**
+[Looks down shyly]
+**Needs Improvement**
+*Try using your words to introduce yourself*
+
+"Hi."
+**Basic**
+*Good start! You could also tell your name.*
+
+"Hi! I'm [name]. Nice to meet you!"
+**Excellent**
+*Excellent! You gave a friendly greeting and introduced yourself.*
+
+**Stella:**
+"What do you like to do for fun?"
+
+**Player Response Options:**
+[Shrugs]
+**Needs Improvement**
+*Try sharing something you enjoy doing*
+
+"I like toys."
+**Basic**
+*Good! Can you be more specific about which toys?*
+
+"I like playing soccer and building with Legos. Do you like those too?"
+**Excellent**
+*Excellent! You shared your interests and asked a question back.*
+`;
+}

@@ -15,7 +15,7 @@ const games = [
     id: 'narrative-assessment',
     title: 'Penguin Story Time',
     description: 'Help the penguin by telling a story about a birthday party!',
-    imagePath: '/penguin.png', // You can replace this with a penguin image
+    imagePath: '/penguin-game.png', // Updated image path
     path: '/narrative-assessment',
     backgroundColor: 'bg-gradient-to-br from-blue-100 to-blue-50'
   }
