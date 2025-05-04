@@ -13,7 +13,8 @@ const games = [{
   id: 'narrative-assessment',
   title: 'Penguin Story Time',
   description: 'Help the penguin by telling a story about a birthday party!',
-  imagePath: '/penguin.png',
+  imagePath: '', // Removed image path to use emoji instead
+  emoji: '🐧', // Added emoji instead of using an image
   path: '/narrative-assessment',
   backgroundColor: 'bg-gradient-to-br from-blue-100 to-blue-50'
 }];

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Button } from "@/components/ui/button";
@@ -129,11 +128,9 @@ const NarrativeAssessment: React.FC = () => {
       
       {showPenguin && (
         <PenguinContainer>
-          <img 
-            src="/assets/mini-game-assets/frontend/public/penguin.png"
-            alt="Penguin Character" 
-            className="w-full h-full object-contain object-bottom"
-          />
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-9xl">🐧</span>
+          </div>
         </PenguinContainer>
       )}
       

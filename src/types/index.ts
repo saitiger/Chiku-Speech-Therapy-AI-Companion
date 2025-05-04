@@ -1,3 +1,4 @@
+
 // Define types for our application
 
 export interface Scenario {
@@ -120,6 +121,7 @@ export interface GameCard {
   title: string;
   description: string;
   imagePath: string;
+  emoji?: string;  // Added emoji field for using emojis instead of images
   path: string;
   backgroundColor: string;
 }
