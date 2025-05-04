@@ -70,6 +70,7 @@ const ResponseInput: React.FC = () => {
       // Event handler for when data is available
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
+          console.log("Audio data received, size:", event.data.size);
           audioChunksRef.current.push(event.data);
         }
       };
@@ -108,6 +109,7 @@ const ResponseInput: React.FC = () => {
           
           // Create a blob from the audio chunks
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          console.log("Audio blob created, size:", audioBlob.size);
           
           if (supabaseConfigured) {
             // Convert speech to text using Groq Whisper API via Supabase Edge Function
@@ -118,6 +120,7 @@ const ResponseInput: React.FC = () => {
             if (transcribedText) {
               setUserResponse(transcribedText);
               toast.success("Speech converted to text");
+              console.log("Transcribed text:", transcribedText);
             } else {
               toast.error("Could not transcribe your speech. Please try again or type your response.");
             }

@@ -3,7 +3,6 @@
 // https://deno.land/manual/getting_started/setup_your_environment
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const CLAUDE_API_KEY = Deno.env.get("CLAUDE_API_KEY") || "";
 const CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
@@ -34,6 +33,7 @@ serve(async (req) => {
   try {
     // Check if Claude API key is configured
     if (!CLAUDE_API_KEY) {
+      console.error("Claude API key not configured");
       return new Response(
         JSON.stringify({ error: "Claude API key not configured" }),
         {
@@ -56,6 +56,8 @@ serve(async (req) => {
       );
     }
 
+    console.log("Received request to evaluate response:", childResponse.substring(0, 50) + "...");
+    
     // Create system prompt for Claude
     const systemPrompt = `You are a licensed speech-language pathologist and child psychologist evaluating a child's speech therapy interaction. The child is between 6–10 years old and responded during a guided exercise in a speech therapy app. Use the following hybrid rubric to score and provide feedback.
 
@@ -114,6 +116,8 @@ Format example (please include all these fields):
 
 Important: Return ONLY the JSON object, nothing else, so it can be parsed directly.`;
 
+    console.log("Calling Claude API...");
+    
     // Call Claude API
     const claudeResponse = await fetch(CLAUDE_API_URL, {
       method: "POST",
@@ -139,11 +143,15 @@ Important: Return ONLY the JSON object, nothing else, so it can be parsed direct
     }
 
     const claudeData = await claudeResponse.json();
+    console.log("Claude API response received");
+    
     const responseContent = claudeData.content?.[0]?.text || "{}";
     
     // Parse the JSON from Claude's response
     try {
       const feedbackData = JSON.parse(responseContent);
+      console.log("Parsed feedback data successfully");
+      
       return new Response(JSON.stringify(feedbackData), {
         headers: { "Content-Type": "application/json" },
         status: 200,

@@ -21,8 +21,10 @@ export const convertSpeechToText = async (audioBlob: Blob): Promise<string> => {
     // If Supabase is configured, use the Edge Function
     if (isSupabaseConfigured && supabase) {
       try {
+        console.log('Converting speech to text using Groq Whisper API');
         // Convert audio blob to base64
         const base64Audio = await blobToBase64(audioBlob);
+        console.log('Audio converted to base64, length:', base64Audio.length);
         
         // Call the Edge Function for speech-to-text conversion
         const { data, error } = await supabase.functions.invoke('groq-whisper', {
@@ -35,6 +37,7 @@ export const convertSpeechToText = async (audioBlob: Blob): Promise<string> => {
           return '';
         }
 
+        console.log('Transcription result:', data);
         return data.text || '';
       } catch (supabaseError) {
         console.error('Error calling Supabase Edge Function (speech-to-text):', supabaseError);
