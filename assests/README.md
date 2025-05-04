@@ -1,0 +1,1 @@
+Assests for lovable to access codebase and files for implementing and iterating on the MVP
