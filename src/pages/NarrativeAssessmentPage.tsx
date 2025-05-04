@@ -57,6 +57,7 @@ const NarrativeAssessmentContent: React.FC = () => {
   );
 };
 
+// Important: We need to wrap the component with ScenarioProvider
 const NarrativeAssessmentPage: React.FC = () => {
   return (
     <ScenarioProvider>

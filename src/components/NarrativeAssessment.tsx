@@ -1,7 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Button } from "@/components/ui/button";
+import { Mic, Square, Play } from 'lucide-react';
+import { useScenario } from '@/context/ScenarioContext';
+import { convertSpeechToText } from '@/services/api';
 
 const AntarcticBackdrop = styled.div`
   width: 100%;
@@ -43,14 +46,82 @@ const TextBubble = styled.div`
 `;
 
 const NarrativeAssessment: React.FC = () => {
+  const { setUserResponse, setIsLoading } = useScenario();
   const [showPenguin, setShowPenguin] = useState(false);
   const [showBubble, setShowBubble] = useState(false);
   const [childName, setChildName] = useState('Radhika');
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedAudio, setRecordedAudio] = useState<string | null>(null);
+  
+  // Refs for audio recording
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   
   useEffect(() => {
     setTimeout(() => setShowPenguin(true), 400);
     setTimeout(() => setShowBubble(true), 2200);
   }, []);
+
+  // Start recording function
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+      
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+      
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        setRecordedAudio(audioUrl);
+        
+        // Process audio with speech-to-text API
+        try {
+          setIsLoading(true);
+          const transcribedText = await convertSpeechToText(audioBlob);
+          if (transcribedText) {
+            setUserResponse(transcribedText);
+          }
+        } catch (error) {
+          console.error("Error processing audio:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error("Error starting recording:", error);
+    }
+  };
+
+  // Stop recording function
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      
+      // Release microphone access
+      if (mediaRecorderRef.current.stream) {
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      }
+    }
+  };
+
+  // Play recorded audio
+  const playRecording = () => {
+    if (recordedAudio) {
+      const audio = new Audio(recordedAudio);
+      audio.play();
+    }
+  };
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-blue-50">
@@ -59,7 +130,7 @@ const NarrativeAssessment: React.FC = () => {
       {showPenguin && (
         <PenguinContainer>
           <img 
-            src="/assests/mini-game-assets/frontend/src/penguin.png"
+            src="/penguin.png"
             alt="Penguin Character" 
             className="w-full h-full object-contain"
           />
@@ -73,12 +144,39 @@ const NarrativeAssessment: React.FC = () => {
       )}
 
       <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
-        <Button
-          className="bg-red-500 hover:bg-red-600 text-white rounded-full w-20 h-20 flex items-center justify-center mb-4"
-        >
-          <span className="text-3xl">🎤</span>
-        </Button>
-        <p className="text-gray-700">Press to start recording</p>
+        {isRecording ? (
+          <Button
+            onClick={stopRecording}
+            className="bg-red-500 hover:bg-red-600 text-white rounded-full w-20 h-20 flex items-center justify-center mb-4"
+          >
+            <Square size={24} />
+          </Button>
+        ) : recordedAudio ? (
+          <div className="flex gap-4 mb-4">
+            <Button
+              onClick={playRecording}
+              className="bg-green-500 hover:bg-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center"
+            >
+              <Play size={24} />
+            </Button>
+            <Button
+              onClick={startRecording}
+              className="bg-red-500 hover:bg-red-600 text-white rounded-full w-16 h-16 flex items-center justify-center"
+            >
+              <Mic size={24} />
+            </Button>
+          </div>
+        ) : (
+          <Button
+            onClick={startRecording}
+            className="bg-red-500 hover:bg-red-600 text-white rounded-full w-20 h-20 flex items-center justify-center mb-4"
+          >
+            <Mic size={24} />
+          </Button>
+        )}
+        <p className="text-gray-700">
+          {isRecording ? "Recording... Click to stop" : "Press to start recording"}
+        </p>
       </div>
 
       <style>{`

@@ -7,7 +7,7 @@ import { useScenario } from '@/context/ScenarioContext';
 
 interface ScenarioCardProps {
   scenario: Scenario;
-  onSelect?: () => void;
+  onSelect?: () => void | Promise<void>; // Updated to allow for async function
 }
 
 const ScenarioCard: React.FC<ScenarioCardProps> = ({ scenario, onSelect }) => {
