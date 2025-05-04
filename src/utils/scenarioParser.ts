@@ -228,7 +228,7 @@ function generateFallbackScenario(): string {
         {
           "text": "Yes.",
           "quality": "Basic",
-          "feedback": "Good clear answer. You could add \"please\" to be more polite"
+          "feedback": "Good clear answer. You could add \\"please\\" to be more polite"
         },
         {
           "text": "Yes, please.",
