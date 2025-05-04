@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useScenario } from '@/context/ScenarioContext';
 import { ResponseOption, DifficultyLevelContent } from '@/types';
@@ -40,6 +39,14 @@ const InteractiveScenario: React.FC<InteractiveScenarioProps> = ({ scenarioConte
   const handleSelectResponse = (response: ResponseOption) => {
     setSelectedResponse(response);
     setShowFeedback(true);
+  };
+  
+  // Find and update the incrementStep function to explicitly return a number
+  const incrementStep = () => {
+    setCurrentStep((prev: number) => {
+      const newStep = prev + 1;
+      return newStep;
+    });
   };
   
   const handleNextStep = () => {
@@ -88,7 +95,7 @@ const InteractiveScenario: React.FC<InteractiveScenarioProps> = ({ scenarioConte
       }
     } else {
       // Move to the next step
-      setCurrentStep(prev => prev + 1);
+      incrementStep();
     }
   };
   
