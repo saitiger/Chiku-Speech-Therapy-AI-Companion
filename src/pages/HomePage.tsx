@@ -8,17 +8,17 @@ import { Button } from '@/components/ui/button';
 import { BarChart, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
-
 const games = [{
   id: 'narrative-assessment',
   title: 'Penguin Story Time',
   description: 'Help the penguin by telling a story about a birthday party!',
-  imagePath: '', // Removed image path to use emoji instead
-  emoji: '🐧', // Added emoji instead of using an image
+  imagePath: '',
+  // Removed image path to use emoji instead
+  emoji: '🐧',
+  // Added emoji instead of using an image
   path: '/narrative-assessment',
   backgroundColor: 'bg-gradient-to-br from-blue-100 to-blue-50'
 }];
-
 const HomePage: React.FC = () => {
   const {
     setActiveScenario,
@@ -105,9 +105,7 @@ const HomePage: React.FC = () => {
         </div>
       </main>
       
-      <footer className="py-4 px-6 text-center text-sm text-speech-dark/60">
-        <p>Speech Stars Playtime Pal - Helping children practice speech skills through fun activities!</p>
-      </footer>
+      
     </div>;
 };
 export default HomePage;
