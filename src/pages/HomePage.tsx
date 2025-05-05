@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Scenario } from '@/types';
 import ScenarioCard from '@/components/ScenarioCard';
@@ -8,7 +7,6 @@ import GameCard from '@/components/GameCard';
 import { Button } from '@/components/ui/button';
 import { BarChart, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 const games = [{
   id: 'narrative-assessment',
   title: 'Penguin Story Time',
@@ -18,14 +16,12 @@ const games = [{
   path: '/narrative-assessment',
   backgroundColor: 'bg-gradient-to-br from-blue-100 to-blue-50'
 }];
-
 const HomePage: React.FC = () => {
   const {
     setActiveScenario,
     progressData
   } = useScenario();
   const navigate = useNavigate();
-
   const handleSelectScenario = async (scenario: Scenario) => {
     try {
       if (scenario.id === "cafe") {
@@ -61,15 +57,11 @@ const HomePage: React.FC = () => {
       navigate('/scenario');
     }
   };
-
-  return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-speech-light">
+  return <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-speech-light">
       <main className="flex-1 px-4 py-6">
         <div className="w-full max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-speech-dark">
-              Speech Stars Playtime
-            </h1>
+            
             
             <div className="flex gap-3">
               <Button variant="outline" className="flex items-center gap-2 border-speech-purple text-speech-purple hover:bg-speech-purple/5" onClick={() => navigate('/progress')}>
@@ -105,8 +97,6 @@ const HomePage: React.FC = () => {
           </section>
         </div>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default HomePage;
