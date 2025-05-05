@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useScenario } from '@/context/ScenarioContext';
 import { generateClaudeFeedback, convertSpeechToText } from '@/services/api';
 import { sampleResponses } from '@/data/scenarios';
-import { Mic, MicOff, Check } from 'lucide-react';
+import { Mic, MicOff, Check, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ResponseInput: React.FC = () => {
@@ -23,6 +23,9 @@ const ResponseInput: React.FC = () => {
   
   const [showExamples, setShowExamples] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [enhancedText, setEnhancedText] = useState<string>('');
+  const [speechPatterns, setSpeechPatterns] = useState<any>(null);
+  const [showEnhanced, setShowEnhanced] = useState(true);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const supabaseConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -114,13 +117,23 @@ const ResponseInput: React.FC = () => {
           if (supabaseConfigured) {
             // Convert speech to text using Groq Whisper API via Supabase Edge Function
             setIsLoading(true);
-            const transcribedText = await convertSpeechToText(audioBlob);
+            
+            // Use the updated function that returns enhanced text and speech patterns
+            const transcriptionResult = await convertSpeechToText(audioBlob);
             setIsLoading(false);
             
-            if (transcribedText) {
-              setUserResponse(transcribedText);
+            if (transcriptionResult.text) {
+              setUserResponse(transcriptionResult.text);
+              setEnhancedText(transcriptionResult.enhancedText || transcriptionResult.text);
+              setSpeechPatterns(transcriptionResult.speechPatterns);
               toast.success("Speech converted to text");
-              console.log("Transcribed text:", transcribedText);
+              console.log("Transcribed text:", transcriptionResult.text);
+              
+              if (transcriptionResult.enhancedText !== transcriptionResult.text) {
+                toast.info("Speech patterns detected", {
+                  description: "View the enhanced transcript for more details"
+                });
+              }
             } else {
               toast.error("Could not transcribe your speech. Please try again or type your response.");
             }
@@ -167,6 +180,38 @@ const ResponseInput: React.FC = () => {
     setShowExamples(false);
   };
   
+  // Toggle between original and enhanced transcript
+  const toggleTranscriptView = () => {
+    setShowEnhanced(!showEnhanced);
+  };
+  
+  // Render speech patterns information
+  const renderSpeechPatterns = () => {
+    if (!speechPatterns) return null;
+    
+    const { pauses } = speechPatterns;
+    
+    return (
+      <div className="mt-3 p-3 bg-blue-50 rounded-xl text-sm text-gray-700">
+        <h4 className="font-medium text-speech-dark mb-2">Speech Pattern Analysis:</h4>
+        {pauses && pauses.length > 0 ? (
+          <div>
+            <p>Detected {pauses.length} significant pauses:</p>
+            <ul className="list-disc pl-5 mt-1">
+              {pauses.map((pause: any, index: number) => (
+                <li key={index}>
+                  {pause.duration.toFixed(1)}s pause at {pause.start.toFixed(1)}s
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p>No significant speech patterns detected.</p>
+        )}
+      </div>
+    );
+  };
+  
   if (!activeScenario) return null;
   
   return (
@@ -174,11 +219,25 @@ const ResponseInput: React.FC = () => {
       <div className="relative">
         <Textarea
           placeholder="Type your response here or press the microphone button to speak..."
-          value={userResponse}
+          value={showEnhanced && enhancedText ? enhancedText : userResponse}
           onChange={handleInputChange}
           className="min-h-[120px] text-speech-dark p-4 pr-12 rounded-xl border-2 border-speech-purple/20 focus:border-speech-purple"
           disabled={isListening || isLoading}
         />
+        
+        {enhancedText && enhancedText !== userResponse && (
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="absolute right-12 bottom-2 text-speech-blue"
+            onClick={toggleTranscriptView}
+            disabled={isLoading}
+          >
+            <Eye size={20} />
+          </Button>
+        )}
+        
         <Button
           type="button"
           size="icon"
@@ -190,6 +249,8 @@ const ResponseInput: React.FC = () => {
           {isRecording ? <MicOff size={24} /> : <Mic size={24} />}
         </Button>
       </div>
+
+      {enhancedText && enhancedText !== userResponse && showEnhanced && speechPatterns && renderSpeechPatterns()}
 
       {showExamples && activeScenario.id in sampleResponses && (
         <div className="mt-3 bg-white rounded-xl p-3 border border-speech-purple/20 shadow-sm">

@@ -90,6 +90,9 @@ const NarrativeAssessment: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedAudio, setRecordedAudio] = useState<string | null>(null);
   const [transcriptionInProgress, setTranscriptionInProgress] = useState(false);
+  const [enhancedText, setEnhancedText] = useState<string>('');
+  const [speechPatterns, setSpeechPatterns] = useState<any>(null);
+  const [showEnhanced, setShowEnhanced] = useState(true);
   
   // Refs for audio recording
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -125,14 +128,17 @@ const NarrativeAssessment: React.FC = () => {
           setTranscriptionInProgress(true);
           
           console.log("Sending audio for transcription, blob size:", audioBlob.size);
-          const transcribedText = await convertSpeechToText(audioBlob);
+          const transcriptionResult = await convertSpeechToText(audioBlob);
           
-          if (transcribedText) {
-            setUserResponse(transcribedText);
+          if (transcriptionResult.text) {
+            setUserResponse(transcriptionResult.text);
+            setEnhancedText(transcriptionResult.enhancedText || transcriptionResult.text);
+            setSpeechPatterns(transcriptionResult.speechPatterns);
+            
             toast.success("Audio successfully transcribed!");
             
             // Now process the transcribed text with Claude
-            processWithClaude(transcribedText);
+            processWithClaude(transcriptionResult.text);
           } else {
             toast.error("Could not transcribe audio. Please try again.");
             setIsLoading(false);
@@ -211,7 +217,41 @@ const NarrativeAssessment: React.FC = () => {
     advanceToNextStep();
     setRecordedAudio(null);
     setShowBubble(false);
+    setEnhancedText('');
+    setSpeechPatterns(null);
     setTimeout(() => setShowBubble(true), 500);
+  };
+
+  // Render speech patterns information
+  const renderSpeechPatterns = () => {
+    if (!speechPatterns) return null;
+    
+    const { pauses } = speechPatterns;
+    
+    return (
+      <div className="mt-4 p-4 bg-blue-50 rounded-xl text-sm text-gray-700">
+        <h4 className="font-medium text-speech-dark mb-2">Speech Pattern Analysis:</h4>
+        {pauses && pauses.length > 0 ? (
+          <div>
+            <p>Detected {pauses.length} significant pauses:</p>
+            <ul className="list-disc pl-5 mt-1">
+              {pauses.map((pause: any, index: number) => (
+                <li key={index}>
+                  {pause.duration.toFixed(1)}s pause at {pause.start.toFixed(1)}s
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p>No significant speech patterns detected.</p>
+        )}
+      </div>
+    );
+  };
+
+  // Toggle between regular and enhanced transcript
+  const toggleTranscriptView = () => {
+    setShowEnhanced(!showEnhanced);
   };
 
   return (
@@ -297,10 +337,25 @@ const NarrativeAssessment: React.FC = () => {
            "Press to start recording"}
         </p>
         
-        {userResponse && (
+        {(userResponse || enhancedText) && (
           <div className="mt-6 p-5 bg-white rounded-2xl shadow-md max-w-lg border-2 border-speech-blue/10">
-            <h3 className="text-speech-dark font-medium mb-2">Your response:</h3>
-            <p className="text-gray-700 italic">"{userResponse}"</p>
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-speech-dark font-medium">Your response:</h3>
+              {enhancedText && enhancedText !== userResponse && (
+                <button 
+                  onClick={toggleTranscriptView}
+                  className="text-xs bg-speech-blue/10 hover:bg-speech-blue/20 text-speech-blue px-2 py-1 rounded-md"
+                >
+                  {showEnhanced ? "Show Original" : "Show Enhanced"}
+                </button>
+              )}
+            </div>
+            
+            <p className="text-gray-700 italic">
+              "{showEnhanced && enhancedText ? enhancedText : userResponse}"
+            </p>
+            
+            {speechPatterns && renderSpeechPatterns()}
           </div>
         )}
       </div>

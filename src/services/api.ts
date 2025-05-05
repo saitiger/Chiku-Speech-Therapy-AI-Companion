@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 // Speech-to-text conversion using Groq Whisper API via Supabase Edge Function
-export const convertSpeechToText = async (audioBlob: Blob): Promise<string> => {
+export const convertSpeechToText = async (audioBlob: Blob): Promise<{text: string, enhancedText: string, speechPatterns: any}> => {
   try {
     console.log('Converting speech to text using Groq Whisper API');
     // Convert audio blob to base64
@@ -13,21 +13,28 @@ export const convertSpeechToText = async (audioBlob: Blob): Promise<string> => {
     
     // Call the Edge Function for speech-to-text conversion
     const { data, error } = await supabase.functions.invoke('groq-whisper', {
-      body: { audio: base64Audio }
+      body: { 
+        audio: base64Audio,
+        analyzePatterns: true // Enable speech pattern analysis
+      }
     });
 
     if (error) {
       console.error('Supabase Edge Function error (speech-to-text):', error);
       toast.error('Unable to convert speech to text. Please try typing instead.');
-      return '';
+      return { text: '', enhancedText: '', speechPatterns: null };
     }
 
     console.log('Transcription result:', data);
-    return data.text || '';
+    return {
+      text: data.text || '',
+      enhancedText: data.enhancedText || data.text || '',
+      speechPatterns: data.speechPatterns || null
+    };
   } catch (supabaseError) {
     console.error('Error calling Supabase Edge Function (speech-to-text):', supabaseError);
     toast.error('Unable to convert speech to text. Please try typing instead.');
-    return '';
+    return { text: '', enhancedText: '', speechPatterns: null };
   }
 };
 
