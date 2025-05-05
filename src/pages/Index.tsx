@@ -12,11 +12,11 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-speech-light">
       <Header />
-      <main className="flex-1 flex flex-col items-center py-6">
+      <main className="flex-1 flex flex-col items-center py-6 px-4 md:px-6">
         {activeScenario ? <ScenarioPage /> : <HomePage />}
       </main>
-      <footer className="py-4 px-6 text-center text-sm text-speech-dark/60">
-        <p>Speech Stars Playtime Pal - Helping children practice speech skills through fun activities!</p>
+      <footer className="py-4 px-6 text-center text-sm text-speech-dark/60 bg-white shadow-inner">
+        <p className="font-nunito">Chiku - Helping children practice speech skills through fun activities!</p>
       </footer>
     </div>
   );

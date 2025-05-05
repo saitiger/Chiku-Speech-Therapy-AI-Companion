@@ -21,7 +21,7 @@ const PenguinContainer = styled.div`
   bottom: 80px;
   left: 0;
   width: 200px;
-  height: 300px;  /* Increased height for better appearance */
+  height: 300px;
   animation: waddle 2s cubic-bezier(.68,-0.55,.27,1.55) forwards;
   @keyframes waddle {
     from { left: -220px; }
@@ -37,7 +37,7 @@ const TextBubble = styled.div<{ isResponse?: boolean }>`
   background: #fff;
   border-radius: 30px;
   border: 4px solid #222;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   padding: 28px 36px;
   font-size: 1.5rem;
   color: #333;
@@ -54,12 +54,14 @@ const StepIndicator = styled.div`
   position: absolute;
   top: 20px;
   right: 20px;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 20px;
   padding: 8px 16px;
   font-size: 0.9rem;
+  font-weight: 600;
   color: #333;
   z-index: 3;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 `;
 
 // Step dialogue prompts
@@ -156,7 +158,7 @@ const NarrativeAssessment: React.FC = () => {
   // Process transcribed text with Claude
   const processWithClaude = async (transcribedText: string) => {
     try {
-      const scenarioContext = `Penguin Narrative Assessment, Step ${currentStep} of ${totalSteps}: "${stepDialogues[currentStep-1]}"`;
+      const scenarioContext = `Chiku Speech Assessment, Step ${currentStep} of ${totalSteps}: "${stepDialogues[currentStep-1]}"`;
       
       // Get feedback from Claude through the API
       const claudeFeedback = await generateClaudeFeedback(
@@ -223,7 +225,11 @@ const NarrativeAssessment: React.FC = () => {
       {showPenguin && (
         <PenguinContainer>
           <div className="w-full h-full flex items-center justify-center">
-            <span className="text-9xl">🐧</span>
+            <img 
+              src="/lovable-uploads/01ba70bd-660d-45af-9ef6-716a0689f339.png" 
+              alt="Chiku" 
+              className="w-full h-full object-contain"
+            />
           </div>
         </PenguinContainer>
       )}
@@ -235,15 +241,15 @@ const NarrativeAssessment: React.FC = () => {
       )}
       
       {userResponse && stepFeedback && (
-        <div className="absolute top-36 right-10 w-80 bg-white p-4 rounded-lg shadow-lg z-10">
-          <h3 className="font-bold text-gray-800 mb-2">Feedback:</h3>
-          <p className="text-gray-700 mb-3">{stepFeedback.feedback}</p>
-          <p className="text-green-600 italic">{stepFeedback.encouragement}</p>
-          <p className="text-blue-600 mt-2 font-medium">{stepFeedback.nextStepTip}</p>
+        <div className="absolute top-36 right-10 w-80 bg-white p-6 rounded-2xl shadow-lg z-10 border-2 border-speech-blue/20">
+          <h3 className="font-bold text-speech-dark mb-3 text-lg">Feedback:</h3>
+          <p className="text-gray-700 mb-4">{stepFeedback.feedback}</p>
+          <p className="text-green-600 italic mb-2">{stepFeedback.encouragement}</p>
+          <p className="text-speech-blue font-medium mb-4">{stepFeedback.nextStepTip}</p>
           
           <Button 
             onClick={handleNextStep} 
-            className="mt-4 w-full flex items-center justify-center gap-2 bg-speech-purple"
+            className="mt-2 w-full flex items-center justify-center gap-2 bg-speech-purple hover:bg-speech-purple/90 transition-all rounded-xl py-2"
           >
             Continue <ArrowRight size={16} />
           </Button>
@@ -254,23 +260,23 @@ const NarrativeAssessment: React.FC = () => {
         {isRecording ? (
           <Button
             onClick={stopRecording}
-            className="bg-red-500 hover:bg-red-600 text-white rounded-full w-20 h-20 flex items-center justify-center mb-4"
+            className="bg-red-500 hover:bg-red-600 text-white rounded-full w-20 h-20 flex items-center justify-center mb-4 shadow-lg transition-transform hover:scale-105"
             disabled={transcriptionInProgress}
           >
             <Square size={24} />
           </Button>
         ) : recordedAudio ? (
-          <div className="flex gap-4 mb-4">
+          <div className="flex gap-6 mb-4">
             <Button
               onClick={playRecording}
-              className="bg-green-500 hover:bg-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center"
+              className="bg-green-500 hover:bg-green-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transition-transform hover:scale-105"
               disabled={transcriptionInProgress}
             >
               <Play size={24} />
             </Button>
             <Button
               onClick={startRecording}
-              className="bg-red-500 hover:bg-red-600 text-white rounded-full w-16 h-16 flex items-center justify-center"
+              className="bg-speech-purple hover:bg-speech-purple/90 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg transition-transform hover:scale-105"
               disabled={transcriptionInProgress}
             >
               <Mic size={24} />
@@ -279,22 +285,22 @@ const NarrativeAssessment: React.FC = () => {
         ) : (
           <Button
             onClick={startRecording}
-            className="bg-red-500 hover:bg-red-600 text-white rounded-full w-20 h-20 flex items-center justify-center mb-4"
+            className="bg-speech-purple hover:bg-speech-purple/90 text-white rounded-full w-20 h-20 flex items-center justify-center mb-4 shadow-lg transition-transform hover:scale-105"
             disabled={transcriptionInProgress}
           >
             <Mic size={24} />
           </Button>
         )}
-        <p className="text-gray-700">
+        <p className="text-speech-dark font-medium bg-white px-4 py-2 rounded-full shadow-sm">
           {isRecording ? "Recording... Click to stop" : 
            transcriptionInProgress ? "Processing..." :
            "Press to start recording"}
         </p>
         
         {userResponse && (
-          <div className="mt-6 p-4 bg-white rounded-lg shadow-md max-w-lg">
-            <h3 className="text-gray-700 font-medium mb-2">Your response:</h3>
-            <p className="text-gray-600">"{userResponse}"</p>
+          <div className="mt-6 p-5 bg-white rounded-2xl shadow-md max-w-lg border-2 border-speech-blue/10">
+            <h3 className="text-speech-dark font-medium mb-2">Your response:</h3>
+            <p className="text-gray-700 italic">"{userResponse}"</p>
           </div>
         )}
       </div>
