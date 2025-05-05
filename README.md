@@ -95,19 +95,23 @@ Visual Feedback:
 Animated stars, progress badges, and retry prompts support engagement.
 
 🔍 Challenges Faced
+
 ⚖️ Balancing Support vs Accuracy:
 Early versions gave overly positive feedback. Now rebalanced to focus on learning without discouragement.
 
 🧠 Handling Whisper “Perfection”:
 Whisper’s clean transcripts hid real fluency issues. Prompt updated to infer disfluency from syntax and phrasing.
+Researched on ways augment the transcribed text to improve the final output
 
 ⚙️ Child-Centered Design:
+
 Designing an accessible, fun, and intuitive UI while collecting clinically relevant data like SSIS scores.
 
 🔒 Separation of Feedback and Scoring:
 SSIS data is logged for professionals only, ensuring children are not exposed to evaluative metrics.
 
 📈 Next Steps (Post-MVP)
+
 Add more scenarios (e.g., doctor visit, birthday party)
 
 Integrate speech recognition-based pronunciation feedback
