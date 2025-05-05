@@ -72,7 +72,7 @@ SSIS Score Logger (internal use)
 
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/yourusername/speech-therapy-app.git
+   git clone https://github.com/yourusername/Chiku-Speech-Therapy-AI-Companion.git
    cd speech-therapy-app
 2. **Install Dependencies**
    ```
@@ -80,7 +80,7 @@ SSIS Score Logger (internal use)
 3. **Run the app locally**
    ```
    npm run dev
-
+   
 ⚙️ Implementation Details
 Dialogue System:
 Reads from scenario JSON with multi-level difficulty and response options.
