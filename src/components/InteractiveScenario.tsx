@@ -88,9 +88,10 @@ const InteractiveScenario: React.FC<InteractiveScenarioProps> = ({
         // Process audio with speech-to-text API
         try {
           setIsProcessing(true);
-          const transcribedText = await convertSpeechToText(audioBlob);
-          if (transcribedText) {
-            setCustomResponse(transcribedText);
+          const result = await convertSpeechToText(audioBlob);
+          if (result) {
+            // Fix: Extract the text property from the result object
+            setCustomResponse(result.enhancedText || result.text);
             toast.success("Great response! Click 'Submit' to continue.");
           }
         } catch (error) {
