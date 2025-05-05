@@ -2,7 +2,6 @@
 import React from 'react';
 import { ScenarioProvider } from '@/context/ScenarioContext';
 import { useScenario } from '@/context/ScenarioContext';
-import Header from '@/components/Header';
 import HomePage from '@/pages/HomePage';
 import ScenarioPage from '@/pages/ScenarioPage';
 
@@ -11,7 +10,6 @@ const AppContent: React.FC = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-speech-light">
-      <Header />
       <main className="flex-1 flex flex-col items-center py-6 px-4 md:px-6">
         {activeScenario ? <ScenarioPage /> : <HomePage />}
       </main>
